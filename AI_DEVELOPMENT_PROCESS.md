@@ -36,7 +36,7 @@ During analysis of the challenge document, I identified two distinct system requ
 **LibraGenie Complexity:**
 ```
 Entity Relationships: 5+ models with complex associations
-Business Rules: 15+ domain-specific validations  
+Business Rules: 15+ domain-specific validations
 User Workflows: Multi-step processes (search → reserve → borrow → return)
 Performance Challenges: Complex queries, N+1 prevention, caching strategies
 Security Layers: Role-based authorization, audit trails, data protection
@@ -67,7 +67,7 @@ The prompt engineering techniques, validation frameworks, and optimization strat
 # Task System: Due date validations and status transitions
 
 # Same security patterns:
-# LibraGenie: Role-based authorization (librarian/member)  
+# LibraGenie: Role-based authorization (librarian/member)
 # Task System: User-owned resource authorization
 ```
 
@@ -1109,7 +1109,7 @@ class Task < ApplicationRecord
   validates :title, presence: true, length: { maximum: 255 }
   validates :status, inclusion: { in: %w[pending in_progress completed] }
   validates :due_date, presence: true
-  
+
   scope :overdue, -> { where('due_date < ? AND status != ?', Date.current, 'completed') }
 end
 
@@ -1145,11 +1145,11 @@ end
      task = Task.find(params[:id])
      task.update(task_params)
    end
-   
+
    # Human validation identifies:
    # ❌ Missing authorization (any user can update any task)
    # ❌ No error handling
-   
+
    # Enhanced version:
    def update
      task = current_user.tasks.find(params[:id])  # Authorization
@@ -1167,14 +1167,14 @@ end
    def index
      tasks = current_user.tasks
    end
-   
+
    # Optimized after human review:
    def index
      tasks = current_user.tasks
                         .page(params[:page])
                         .per(20)
                         .order(created_at: :desc)
-     
+
      tasks = tasks.where(status: params[:status]) if params[:status].present?
      tasks = tasks.overdue if params[:overdue] == 'true'
    end
@@ -1184,19 +1184,19 @@ end
    ```ruby
    # AI basic model:
    validates :status, inclusion: { in: %w[pending in_progress completed] }
-   
+
    # Human-enhanced with state machine:
    include AASM
-   
+
    aasm column: :status do
      state :pending, initial: true
      state :in_progress
      state :completed
-     
+
      event :start do
        transitions from: :pending, to: :in_progress
      end
-     
+
      event :complete do
        transitions from: [:pending, :in_progress], to: :completed
        after do
