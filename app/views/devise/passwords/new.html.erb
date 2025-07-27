@@ -1,0 +1,54 @@
+<% content_for :title, "Reset Password - LibraGenie" %>
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <div class="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center">
+        <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m0 0a2 2 0 012 2m-2-2h-3m-3 7h3m-3 0a2 2 0 01-2-2m0 0a2 2 0 00-2-2m2 2h3m-3 0h3m-6 0a2 2 0 002 2v1a2 2 0 002 2h2a2 2 0 002-2v-1a2 2 0 002-2m-6 0V9a2 2 0 012-2h2a2 2 0 012 2v3"></path>
+        </svg>
+      </div>
+      <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+        Reset Your Password
+      </h2>
+      <p class="mt-2 text-sm text-gray-600">
+        Enter your email address and we'll send you a reset link
+      </p>
+    </div>
+
+    <div class="bg-white shadow-xl rounded-lg px-8 py-8">
+      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }, local: true, class: "space-y-6") do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+
+        <div>
+          <%= f.label :email, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.email_field :email,
+              autofocus: true,
+              autocomplete: "email",
+              class: "appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm",
+              placeholder: "Enter your email address" %>
+        </div>
+
+        <div>
+          <%= f.submit "Send Reset Instructions",
+              class: "group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" %>
+        </div>
+      <% end %>
+
+      <div class="mt-6">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white text-gray-500">Remember your password?</span>
+          </div>
+        </div>
+
+        <div class="mt-6 text-center">
+          <%= render "devise/shared/links" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

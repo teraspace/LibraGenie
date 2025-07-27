@@ -1,0 +1,52 @@
+<div id="author-detail-root"></div>
+
+<script>
+(function() {
+  console.log('Author Detail React page loading...');
+
+  // Get author ID from URL
+  const pathParts = window.location.pathname.split('/');
+  const authorId = pathParts[pathParts.indexOf('authors') + 1];
+
+  console.log('Author ID from URL:', authorId);
+
+  function initializeAuthorDetail() {
+    console.log('Initializing AuthorDetail component...');
+
+    if (typeof window.AuthorDetail === 'undefined') {
+      console.error('AuthorDetail component not found in window object');
+      console.log('Available window components:', Object.keys(window).filter(k => k.includes('Component') || k.includes('Detail') || k.includes('Author')));
+      return;
+    }
+
+    const container = document.getElementById('author-detail-root');
+    if (!container) {
+      console.error('Container #author-detail-root not found');
+      return;
+    }
+
+    try {
+      console.log('Creating AuthorDetail component with authorId:', authorId);
+
+      const root = window.createRoot(container);
+      const element = window.React.createElement(window.AuthorDetail, {
+        authorId: authorId
+      });
+
+      root.render(element);
+      console.log('AuthorDetail component rendered successfully');
+
+    } catch (error) {
+      console.error('Error rendering AuthorDetail component:', error);
+      container.innerHTML = '<div class="alert alert-danger">Error loading component: ' + error.message + '</div>';
+    }
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAuthorDetail);
+  } else {
+    initializeAuthorDetail();
+  }
+})();
+</script>

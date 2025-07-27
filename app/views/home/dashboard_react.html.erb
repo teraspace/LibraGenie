@@ -1,0 +1,80 @@
+<div id="dashboard-react"></div>
+
+<script>
+  function initializeDashboard() {
+    console.log('🚀 Dashboard React loading...');
+
+    const container = document.getElementById('dashboard-react');
+    if (!container) {
+      // Silently return if not on dashboard page - this is normal
+      return;
+    }
+
+    // Check if already initialized
+    if (container.hasAttribute('data-dashboard-initialized')) {
+      console.log('🔄 Dashboard already initialized, skipping...');
+      return;
+    }
+
+    // Clear any existing content
+    container.innerHTML = '';
+
+    // Check if React and components are available
+    if (!window.React || !window.Dashboard) {
+      console.error('❌ Required React components not loaded');
+      container.innerHTML = '<div class="p-4 bg-yellow-100 border border-yellow-400 rounded">Dashboard component failed to load. Please refresh the page.</div>';
+      return;
+    }
+
+    try {
+      // Pass user data from Rails to React
+      const userData = <%= user_signed_in? ? {
+        name: current_user.name || current_user.email,
+        email: current_user.email,
+        role: current_user.role,
+        display_role: current_user.display_role,
+        can_manage_books: current_user.can_manage_books?
+      }.to_json.html_safe : 'null' %>;      // Create React element
+      const element = React.createElement(Dashboard, {
+        user: userData
+      });
+
+      // Render with modern React methods
+      if (window.createRoot) {
+        console.log('📦 Using React 19 createRoot (global) for Dashboard');
+        const root = window.createRoot(container);
+        root.render(element);
+        // Store root reference to avoid recreating
+        container._reactRoot = root;
+      } else if (window.ReactDOM?.createRoot) {
+        console.log('📦 Using React 19 createRoot (ReactDOM) for Dashboard');
+        const root = window.ReactDOM.createRoot(container);
+        root.render(element);
+        container._reactRoot = root;
+      } else if (window.ReactDOM?.render) {
+        console.log('📦 Using React 18 render for Dashboard');
+        window.ReactDOM.render(element, container);
+      } else {
+        console.error('❌ No React rendering method available');
+        container.innerHTML = '<div class="p-4 bg-yellow-100 border border-yellow-400 rounded">React rendering not available</div>';
+        return;
+      }
+
+      // Mark as initialized
+      container.setAttribute('data-dashboard-initialized', 'true');
+      console.log('✅ Dashboard rendered successfully!');
+    } catch (error) {
+      console.error('❌ Dashboard rendering failed:', error);
+      container.innerHTML = `<div class="p-4 bg-red-100 border border-red-400 rounded">Error: ${error.message}</div>`;
+    }
+  }
+
+  // Use a small delay to avoid conflicts with other React initializations
+  function scheduleInitialization() {
+    setTimeout(initializeDashboard, 100);
+  }
+
+  // Listen for both DOMContentLoaded and Turbo navigation
+  document.addEventListener('DOMContentLoaded', scheduleInitialization);
+  document.addEventListener('turbo:load', scheduleInitialization);
+</script>

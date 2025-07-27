@@ -1,0 +1,52 @@
+<div id="category-detail-root"></div>
+
+<script>
+(function() {
+  console.log('Category Detail React page loading...');
+
+  // Get category ID from URL
+  const pathParts = window.location.pathname.split('/');
+  const categoryId = pathParts[pathParts.indexOf('categories') + 1];
+
+  console.log('Category ID from URL:', categoryId);
+
+  function initializeCategoryDetail() {
+    console.log('Initializing CategoryDetail component...');
+
+    if (typeof window.CategoryDetail === 'undefined') {
+      console.error('CategoryDetail component not found in window object');
+      console.log('Available window components:', Object.keys(window).filter(k => k.includes('Component') || k.includes('Detail') || k.includes('Category')));
+      return;
+    }
+
+    const container = document.getElementById('category-detail-root');
+    if (!container) {
+      console.error('Container #category-detail-root not found');
+      return;
+    }
+
+    try {
+      console.log('Creating CategoryDetail component with categoryId:', categoryId);
+
+      const root = window.createRoot(container);
+      const element = window.React.createElement(window.CategoryDetail, {
+        categoryId: categoryId
+      });
+
+      root.render(element);
+      console.log('CategoryDetail component rendered successfully');
+
+    } catch (error) {
+      console.error('Error rendering CategoryDetail component:', error);
+      container.innerHTML = '<div class="alert alert-danger">Error loading component: ' + error.message + '</div>';
+    }
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCategoryDetail);
+  } else {
+    initializeCategoryDetail();
+  }
+})();
+</script>

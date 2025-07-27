@@ -1,0 +1,114 @@
+<div class="max-w-4xl mx-auto">
+  <div class="bg-white rounded-lg shadow-lg p-8">
+    <div class="flex justify-between items-start mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @book.title %></h1>
+        <p class="text-xl text-gray-600">by <%= link_to @book.author.name, @book.author, class: "text-blue-600 hover:text-blue-800" %></p>
+      </div>
+
+      <div class="flex space-x-2">
+        <%= link_to "Edit", edit_book_path(@book), class: "bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded" %>
+        <%= button_to "Delete", @book, method: :delete, confirm: "Are you sure?",
+            class: "bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded border-0" %>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Book Information -->
+      <div class="space-y-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Book Details</h3>
+          <dl class="space-y-2">
+            <div class="flex">
+              <dt class="w-24 text-sm font-medium text-gray-500">ISBN:</dt>
+              <dd class="text-sm text-gray-900"><%= @book.isbn %></dd>
+            </div>
+            <div class="flex">
+              <dt class="w-24 text-sm font-medium text-gray-500">Category:</dt>
+              <dd class="text-sm text-gray-900">
+                <%= link_to @book.category.name, @book.category, class: "text-blue-600 hover:text-blue-800" %>
+              </dd>
+            </div>
+            <% if @book.publication_date %>
+              <div class="flex">
+                <dt class="w-24 text-sm font-medium text-gray-500">Published:</dt>
+                <dd class="text-sm text-gray-900"><%= @book.publication_date.strftime("%B %d, %Y") %></dd>
+              </div>
+            <% end %>
+            <div class="flex">
+              <dt class="w-24 text-sm font-medium text-gray-500">Status:</dt>
+              <dd>
+                <span class="px-2 py-1 rounded text-xs font-medium <%= @book.available? ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                  <%= @book.available? ? 'Available' : 'Borrowed' %>
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <% if @book.description.present? %>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+            <p class="text-gray-700 leading-relaxed"><%= simple_format(@book.description) %></p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Loan Information / Actions -->
+      <div class="space-y-4">
+        <% if @book.available? %>
+          <% if current_user.can_borrow_book? %>
+            <div class="bg-green-50 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-green-800 mb-2">Available for Borrowing</h3>
+              <p class="text-green-700 mb-4">This book is currently available. You can borrow it for up to 2 weeks.</p>
+              <%= button_to "Borrow This Book", borrow_book_path(@book),
+                  class: "w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-center border-0",
+                  confirm: "Are you sure you want to borrow this book?" %>
+            </div>
+          <% else %>
+            <div class="bg-yellow-50 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-yellow-800 mb-2">Cannot Borrow</h3>
+              <p class="text-yellow-700">You have reached the maximum number of borrowed books (5). Please return a book before borrowing another.</p>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="bg-red-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-red-800 mb-2">Currently Borrowed</h3>
+            <% if @current_loan %>
+              <div class="text-red-700 space-y-2">
+                <% if @current_loan.user == current_user %>
+                  <p><strong>You</strong> borrowed this book on <%= @current_loan.borrowed_at.strftime("%B %d, %Y") %></p>
+                  <p>Due date: <strong><%= @current_loan.due_date.strftime("%B %d, %Y") %></strong></p>
+                  <% if @current_loan.overdue? %>
+                    <p class="text-red-800 font-semibold">⚠️ This book is overdue!</p>
+                  <% end %>
+                  <div class="mt-4">
+                    <%= button_to "Return This Book", return_book_book_path(@book), method: :patch,
+                        class: "w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-center border-0",
+                        confirm: "Are you sure you want to return this book?" %>
+                  </div>
+                <% else %>
+                  <p>Borrowed on <%= @current_loan.borrowed_at.strftime("%B %d, %Y") %></p>
+                  <p>Due date: <%= @current_loan.due_date.strftime("%B %d, %Y") %></p>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <!-- Author Information -->
+        <div class="bg-gray-50 rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">About the Author</h3>
+          <p class="text-gray-700"><%= link_to @book.author.name, @book.author, class: "text-blue-600 hover:text-blue-800 font-medium" %></p>
+          <% if @book.author.bio.present? %>
+            <p class="text-gray-600 text-sm mt-2"><%= truncate(@book.author.bio, length: 150) %></p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-gray-200">
+      <%= link_to "← Back to Books", books_path, class: "text-blue-600 hover:text-blue-800" %>
+    </div>
+  </div>
+</div>

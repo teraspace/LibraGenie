@@ -1,0 +1,29 @@
+{
+  "name": "app",
+  "private": true,
+  "devDependencies": {
+    "esbuild": "^0.25.8"
+  },
+  "scripts": {
+    "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
+    "build:css": "npx @tailwindcss/cli -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --minify"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.6",
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo-rails": "^8.0.16",
+    "@tailwindcss/cli": "^4.1.11",
+    "@tanstack/react-query": "^5.83.0",
+    "@testing-library/react": "^16.3.0",
+    "axios": "^1.11.0",
+    "clsx": "^2.1.1",
+    "jest": "^30.0.5",
+    "msw": "^2.10.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.61.1",
+    "react-router-dom": "^7.7.1",
+    "tailwindcss": "^4.1.11",
+    "yup": "^1.6.1"
+  }
+}

@@ -1,0 +1,80 @@
+<div id="categories-list-react"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  function initCategoriesList() {
+    console.log('� CategoriesList React loading...');
+
+    function renderCategoriesList() {
+      var container = document.getElementById('categories-list-react');
+
+      // Silently return if not on categories page - this is normal
+      if (!container) {
+        return;
+      }
+
+      if (!window.React || !window.ReactDOM || !window.CategoriesList) {
+        console.error('❌ Required React components not loaded');
+        console.log('Available components:', {
+          React: !!window.React,
+          ReactDOM: !!window.ReactDOM,
+          CategoriesList: !!window.CategoriesList
+        });
+        container.innerHTML = '<div class="p-4 bg-red-100 border border-red-400 rounded"><h3>❌ React CategoriesList component failed to load</h3><p>Please refresh the page.</p></div>';
+        return;
+      }
+
+      try {
+        console.log('✅ Creating CategoriesList element...');
+        var element = window.React.createElement(window.CategoriesList, {});
+
+        if (typeof window.createRoot === 'function') {
+          console.log('📦 Using React 19+ createRoot');
+          var root = window.createRoot(container);
+          root.render(element);
+        } else if (window.ReactDOM && typeof window.ReactDOM.createRoot === 'function') {
+          console.log('📦 Using ReactDOM.createRoot');
+          var root = window.ReactDOM.createRoot(container);
+          root.render(element);
+        } else if (window.ReactDOM && typeof window.ReactDOM.render === 'function') {
+          console.log('📦 Using legacy ReactDOM.render');
+          window.ReactDOM.render(element, container);
+        } else {
+          throw new Error('No React rendering method available');
+        }
+
+        console.log('✅ CategoriesList rendered successfully');
+      } catch (error) {
+        console.error('❌ Error rendering CategoriesList:', error);
+        container.innerHTML = '<div class="p-4 bg-red-100 border border-red-400 rounded"><h3>❌ Error rendering component</h3><p>' + error.message + '</p></div>';
+      }
+    }
+
+    // Check if we're on the categories page before initializing
+    if (!document.getElementById('categories-list-react')) {
+      return; // Not on categories page, exit silently
+    }
+
+    // Check if React is loaded
+    if (typeof window.React === 'undefined') {
+      console.log('🔄 Waiting for React to load...');
+      setTimeout(initCategoriesList, 100);
+      return;
+    }
+
+    renderCategoriesList();
+  }
+
+  // Initialize when DOM is ready or on Turbo navigation
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCategoriesList);
+  } else {
+    initCategoriesList();
+  }
+
+  // Also listen for Turbo navigation
+  document.addEventListener('turbo:load', initCategoriesList);
+})();
+</script>

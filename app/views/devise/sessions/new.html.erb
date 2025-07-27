@@ -1,0 +1,80 @@
+<% content_for :title, "Login - LibraGenie" %>
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <div class="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center">
+        <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+      </div>
+      <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+        Welcome to LibraGenie
+      </h2>
+      <p class="mt-2 text-sm text-gray-600">
+        Sign in to your library account
+      </p>
+    </div>
+
+    <div class="bg-white shadow-xl rounded-lg px-8 py-8">
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), local: true, class: "space-y-6") do |f| %>
+        <div>
+          <%= f.label :email, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.email_field :email,
+              autofocus: true,
+              autocomplete: "email",
+              class: "appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm",
+              placeholder: "Enter your email address" %>
+        </div>
+
+        <div>
+          <%= f.label :password, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= f.password_field :password,
+              autocomplete: "current-password",
+              class: "appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm",
+              placeholder: "Enter your password" %>
+        </div>
+
+        <% if devise_mapping.rememberable? %>
+          <div class="flex items-center">
+            <%= f.check_box :remember_me,
+                class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+            <%= f.label :remember_me,
+                class: "ml-2 block text-sm text-gray-900" %>
+          </div>
+        <% end %>
+
+        <div>
+          <%= f.submit "Sign In",
+              class: "group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200" %>
+        </div>
+      <% end %>
+
+      <div class="mt-6">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white text-gray-500">Need an account?</span>
+          </div>
+        </div>
+
+        <div class="mt-6 text-center">
+          <%= render "devise/shared/links" %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo Users Info -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-6">
+      <h3 class="text-sm font-medium text-yellow-800 mb-2">🎯 Demo Users for Testing</h3>
+      <div class="text-xs text-yellow-700 space-y-1">
+        <div><strong>Borrower:</strong> borrower@libragenie.com</div>
+        <div><strong>Librarian:</strong> librarian@libragenie.com</div>
+        <div><strong>Admin:</strong> admin@libragenie.com</div>
+        <div class="mt-2"><em>Password for all: password</em></div>
+      </div>
+    </div>
+  </div>
+</div>

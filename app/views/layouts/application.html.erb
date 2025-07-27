@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "LibraGenie - Library Management System" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <link rel="stylesheet" href="/assets/builds/application.css" data-turbo-track="reload">
+    <script src="/assets/builds/application.js" data-turbo-track="reload"></script>
+  </head>
+
+  <body class="bg-gray-50">
+    <nav class="bg-blue-600 text-white shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center">
+            <%= link_to root_path, class: "text-xl font-bold" do %>
+              📚 LibraGenie
+            <% end %>
+          </div>
+
+          <!-- React Search Component -->
+          <% if user_signed_in? %>
+            <div class="flex-1 max-w-md mx-8">
+              <div id="search-books-nav" style="min-height: 40px;" class="flex items-center"></div>
+            </div>
+          <% end %>
+
+          <div class="flex items-center space-x-4">
+            <% if user_signed_in? %>
+              <%= link_to "Dashboard", dashboard_react_path, class: "hover:text-blue-200" %>
+              <%= link_to "Books", index_react_books_path, class: "hover:text-blue-200" %>
+              <%= link_to "Authors", index_react_authors_path, class: "hover:text-blue-200" %>
+              <%= link_to "Categories", index_react_categories_path, class: "hover:text-blue-200" %>
+              <%= link_to "My Loans", index_react_loans_path, class: "hover:text-blue-200" %>
+
+              <div class="relative">
+                <span class="text-sm">Hello, <%= current_user.name || current_user.email %></span>
+                <%= button_to "Logout", destroy_user_session_path,
+                    method: :delete,
+                    data: { turbo_confirm: "Are you sure you want to logout?" },
+                    class: "ml-2 bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded text-sm" %>
+              </div>
+            <% else %>
+              <%= link_to "Login", new_user_session_path, class: "hover:text-blue-200" %>
+              <%= link_to "Sign Up", new_user_registration_path, class: "bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <% if notice %>
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          <%= notice %>
+        </div>
+      <% end %>
+
+      <% if alert %>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <%= alert %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+    <script>
+      function initializeSearchComponent() {
+        // Give a small delay to ensure all scripts load
+        // React Root Management System
+      window.ReactRootManager = {
+        roots: new Map(),
+
+        getOrCreateRoot: function(container, componentName) {
+          if (!container) {
+            console.error('❌ Container is null or undefined for', componentName);
+            return null;
+          }
+
+          const containerId = container.id || `container-${Math.random().toString(36).substr(2, 9)}`;
+          if (!container.id) container.id = containerId;
+
+          // Check if root already exists
+          if (this.roots.has(containerId)) {
+            console.log('♻️ Reusing existing root for', componentName, 'in', containerId);
+            return this.roots.get(containerId);
+          }
+
+          // Create new root
+          let root = null;
+          try {
+            if (typeof window.createRoot === 'function') {
+              console.log('📦 Creating new React 19+ root for', componentName);
+              root = window.createRoot(container);
+            } else if (window.ReactDOM && typeof window.ReactDOM.createRoot === 'function') {
+              console.log('📦 Creating new ReactDOM root for', componentName);
+              root = window.ReactDOM.createRoot(container);
+            } else {
+              console.error('❌ No createRoot method available');
+              return null;
+            }
+
+            this.roots.set(containerId, root);
+            console.log('✅ New root created for', componentName, 'in', containerId);
+            return root;
+          } catch (error) {
+            console.error('❌ Error creating root for', componentName, ':', error);
+            return null;
+          }
+        },
+
+        cleanup: function(containerId) {
+          if (this.roots.has(containerId)) {
+            const root = this.roots.get(containerId);
+            try {
+              if (root && typeof root.unmount === 'function') {
+                root.unmount();
+              }
+            } catch (error) {
+              console.warn('Warning during root cleanup:', error);
+            }
+            this.roots.delete(containerId);
+            console.log('🧹 Cleaned up root for', containerId);
+          }
+        }
+      };
+
+      setTimeout(function() {
+          // Mount search component if container exists
+          const searchContainer = document.getElementById('search-books-nav');
+          if (searchContainer) {
+
+            // Check if already initialized
+            if (searchContainer.hasAttribute('data-search-initialized')) {
+              console.log('🔄 SearchBooks already initialized, skipping...');
+              return;
+            }
+
+            console.log('🔍 Mounting search component...');
+            console.log('SearchBooks available:', typeof window.SearchBooks);
+            console.log('ReactDOM available:', typeof window.ReactDOM);
+
+            // Clear any existing content
+            searchContainer.innerHTML = '';
+
+            if (window.SearchBooks && window.React && window.ReactDOM) {
+              try {
+                console.log('Creating SearchBooks component...');
+                const element = window.React.createElement(window.SearchBooks, {});
+
+                // Use ReactRootManager for consistent root management
+                const root = window.ReactRootManager.getOrCreateRoot(searchContainer, 'SearchBooks');
+                if (root) {
+                  root.render(element);
+                  searchContainer.setAttribute('data-search-initialized', 'true');
+                  console.log('✅ SearchBooks rendered successfully!');
+                } else {
+                  console.error('❌ Failed to create React root for SearchBooks');
+                  searchContainer.innerHTML = '<div class="text-gray-500">Search component error</div>';
+                }
+              } catch (error) {
+                console.error('Error rendering SearchBooks:', error);
+                searchContainer.innerHTML = '<div class="text-gray-500">Search loading...</div>';
+              }
+            } else {
+              console.error('Required components not available:', {
+                SearchBooks: !!window.SearchBooks,
+                React: !!window.React,
+                ReactDOM: !!window.ReactDOM
+              });
+              searchContainer.innerHTML = '<div class="text-gray-500">Search loading...</div>';
+            }
+          }
+        }, 100); // 100ms delay
+      }
+
+      // Listen for both DOMContentLoaded and Turbo navigation
+      document.addEventListener('DOMContentLoaded', initializeSearchComponent);
+      document.addEventListener('turbo:load', initializeSearchComponent);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,178 @@
+<div id="loans-list"></div>
+
+<script>
+  function initializeLoansList() {
+    console.log('🚀 LoansList React loading...');
+
+    // Debug: Check what's available in window
+    console.log('Available React components:', {
+      React: !!window.React,
+      ReactDOM: !!window.ReactDOM,
+      createRoot: !!window.createRoot,
+      LoansList: !!window.LoansList,
+      renderReactComponent: !!window.renderReactComponent
+    });
+
+    // Check if React and components are available
+    if (!window.React) {
+      console.error('❌ React not loaded');
+      return;
+    }
+
+    if (!window.LoansList) {
+      console.error('❌ LoansList component not loaded');
+      return;
+    }
+
+    const container = document.getElementById('loans-list');
+    if (!container) {
+      console.error('❌ Container not found');
+      return;
+    }
+
+    // Clear any existing content
+    container.innerHTML = '';
+
+    try {
+      // Create React element
+      const element = React.createElement(LoansList, {});
+
+      // Try different rendering methods based on what's available
+      if (window.createRoot) {
+        console.log('📦 Using React 19 createRoot (global)');
+        const root = window.createRoot(container);
+        root.render(element);
+      } else if (window.ReactDOM?.createRoot) {
+        console.log('📦 Using React 19 createRoot (ReactDOM)');
+        const root = window.ReactDOM.createRoot(container);
+        root.render(element);
+      } else if (window.ReactDOM?.render) {
+        console.log('📦 Using React 18 render');
+        window.ReactDOM.render(element, container);
+      } else {
+        console.error('❌ No React rendering method available');
+        container.innerHTML = '<div class="p-4 bg-yellow-100 border border-yellow-400 rounded">React rendering not available</div>';
+      }
+
+    } catch (error) {
+      console.error('❌ LoansList rendering failed:', error);
+      container.innerHTML = `<div class="p-4 bg-red-100 border border-red-400 rounded">Error: ${error.message}</div>`;
+    }
+  }
+
+  // Listen for both DOMContentLoaded and Turbo navigation
+  document.addEventListener('DOMContentLoaded', initializeLoansList);
+  document.addEventListener('turbo:load', initializeLoansList);
+</script>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .filter-button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+  }
+
+  .filter-button:hover {
+    background-color: #f3f4f6;
+  }
+
+  .filter-button.active {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .filter-button.active.overdue {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+
+  .loan-item {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.15s ease-in-out;
+  }
+
+  .loan-item:hover {
+    background-color: #f9fafb;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .status-active {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .status-returned {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-overdue {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+    border: none;
+    font-size: 0.875rem;
+  }
+
+  .btn-primary {
+    background-color: #2563eb;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #1d4ed8;
+  }
+
+  .btn-success {
+    background-color: #16a34a;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background-color: #15803d;
+  }
+
+  .loading-spinner {
+    border: 2px solid #f3f4f6;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+
+echo "🔧 Building LibraGenie assets..."
+
+# Clean previous builds
+echo "📁 Cleaning previous builds..."
+rm -rf public/assets/builds
+mkdir -p public/assets/builds
+
+# Build CSS and JS with yarn
+echo "🎨 Building CSS and JS..."
+yarn build:css
+yarn build
+
+# Copy built assets to public directory for serving
+echo "📦 Copying assets to public directory..."
+cp app/assets/builds/* public/assets/builds/
+
+echo "✅ Build complete! Assets are ready to serve."

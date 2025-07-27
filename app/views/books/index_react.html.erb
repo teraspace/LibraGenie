@@ -1,0 +1,116 @@
+<div id="books-list-react"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  function initBooksList() {
+    console.log('📚 BooksList React loading...');
+
+    function renderBooksList(data) {
+      var container = document.getElementById('books-list-react');
+
+      // Silently return if not on books page - this is normal
+      if (!container) {
+        return;
+      }
+
+      // Check if already initialized to prevent duplicates
+      if (container.hasAttribute('data-books-initialized')) {
+        console.log('🔄 BooksList already initialized, skipping...');
+        return;
+      }
+
+      if (!window.React || !window.ReactDOM || !window.BooksList) {
+        console.error('Required React components not loaded');
+        container.innerHTML = '<div class="p-4 bg-yellow-100 border border-yellow-400 rounded">React BooksList component failed to load. Please refresh the page.</div>';
+        return;
+      }
+
+      try {
+        var element = window.React.createElement(window.BooksList, {
+          initialBooks: data.books || [],
+          initialAuthors: data.authors || [],
+          initialCategories: data.categories || []
+        });
+
+        // Use ReactRootManager if available
+        if (window.ReactRootManager) {
+          console.log('🔧 Using ReactRootManager for BooksList');
+          var root = window.ReactRootManager.getOrCreateRoot(container, 'BooksList');
+          if (root) {
+            root.render(element);
+            container.setAttribute('data-books-initialized', 'true');
+            console.log('✅ BooksList rendered successfully with ReactRootManager!');
+          } else {
+            console.error('❌ Failed to get React root for BooksList');
+            container.innerHTML = '<div class="p-4 bg-red-100 border border-red-400 rounded">Failed to initialize BooksList</div>';
+          }
+        } else {
+          // Fallback to direct root creation
+          console.log('⚠️ ReactRootManager not available, using direct creation');
+          if (typeof window.createRoot === 'function') {
+            var root = window.createRoot(container);
+            root.render(element);
+          } else if (window.ReactDOM && typeof window.ReactDOM.createRoot === 'function') {
+            var root = window.ReactDOM.createRoot(container);
+            root.render(element);
+          } else if (window.ReactDOM && typeof window.ReactDOM.render === 'function') {
+            window.ReactDOM.render(element, container);
+          } else {
+            container.innerHTML = '<div class="p-4 bg-blue-100 border border-blue-400 rounded">BooksList component loaded (fallback mode)</div>';
+          }
+          container.setAttribute('data-books-initialized', 'true');
+          console.log('BooksList rendered successfully!');
+        }
+      } catch (error) {
+        console.error('Error rendering BooksList:', error);
+        container.innerHTML = '<div class="p-4 bg-red-100 border border-red-400 rounded">Error: ' + error.message + '</div>';
+      }
+    }
+
+    // Check if we're on the books page before loading data
+    if (!document.getElementById('books-list-react')) {
+      return; // Not on books page, exit silently
+    }
+
+    // Load books data
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/books.json', true);
+    xhr.setRequestHeader('Accept', 'application/json');
+
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          try {
+            var data = JSON.parse(xhr.responseText);
+            console.log('Books data loaded:', data);
+            renderBooksList(data);
+          } catch (e) {
+            console.error('Error parsing JSON:', e);
+            renderBooksList({ books: [], authors: [], categories: [] });
+          }
+        } else {
+          console.error('Error loading books data:', xhr.status);
+          renderBooksList({ books: [], authors: [], categories: [] });
+        }
+      }
+    };
+
+    xhr.send();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(initBooksList, 200);
+    });
+  } else {
+    setTimeout(initBooksList, 200);
+  }
+
+  // Also listen for Turbo navigation
+  document.addEventListener('turbo:load', function() {
+    setTimeout(initBooksList, 200);
+  });
+})();
+</script>

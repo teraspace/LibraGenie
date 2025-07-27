@@ -1,0 +1,75 @@
+<div class="max-w-2xl mx-auto">
+  <div class="bg-white rounded-lg shadow-lg p-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">
+      <%= @book.persisted? ? "Edit Book" : "Add New Book" %>
+    </h1>
+
+    <%= form_with model: @book, local: true, class: "space-y-6" do |form| %>
+      <% if @book.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-md p-4">
+          <h3 class="text-red-800 font-medium">Please fix the following errors:</h3>
+          <ul class="mt-2 text-red-700 text-sm list-disc list-inside">
+            <% @book.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= form.label :title, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.text_field :title, class: "w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+      </div>
+
+      <div>
+        <%= form.label :isbn, "ISBN", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.text_field :isbn, class: "w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <%= form.label :author_id, "Author", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= form.select :author_id,
+              options_from_collection_for_select(@authors, :id, :name, @book.author_id),
+              { prompt: "Select an author" },
+              { class: "w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" } %>
+          <p class="text-sm text-gray-500 mt-1">
+            Don't see the author? <%= link_to "Add a new author", new_author_path, class: "text-blue-600 hover:text-blue-800", target: "_blank" %>
+          </p>
+        </div>
+
+        <div>
+          <%= form.label :category_id, "Category", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= form.select :category_id,
+              options_from_collection_for_select(@categories, :id, :name, @book.category_id),
+              { prompt: "Select a category" },
+              { class: "w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" } %>
+          <p class="text-sm text-gray-500 mt-1">
+            Don't see the category? <%= link_to "Add a new category", new_category_path, class: "text-blue-600 hover:text-blue-800", target: "_blank" %>
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <%= form.label :publication_date, "Publication Date", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.date_field :publication_date, class: "w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+      </div>
+
+      <div>
+        <%= form.label :description, class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= form.text_area :description, rows: 4, class: "w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+        <p class="text-sm text-gray-500 mt-1">Brief description of the book</p>
+      </div>
+
+      <div class="flex justify-between pt-6 border-t border-gray-200">
+        <%= link_to "Cancel", @book.persisted? ? @book : books_path,
+            class: "bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg" %>
+
+        <div class="flex space-x-3">
+          <%= form.submit "Save Book",
+              class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

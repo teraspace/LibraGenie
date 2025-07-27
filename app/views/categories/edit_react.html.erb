@@ -1,0 +1,60 @@
+<div id="category-form-root"></div>
+
+<script>
+(function() {
+  console.log('Category Edit React page loading...');
+
+  // Get category ID from URL
+  const pathParts = window.location.pathname.split('/');
+  const categoryId = pathParts[pathParts.indexOf('categories') + 1];
+
+  console.log('Category ID from URL:', categoryId);
+
+  function initializeCategoryForm() {
+    // Only run if we're on the category edit form page
+    const container = document.getElementById('category-form-edit');
+    if (!container) {
+      // Silently return if container doesn't exist (we're not on the category edit form page)
+      return;
+    }
+
+    console.log('Initializing CategoryForm component...');
+
+    if (typeof window.CategoryForm === 'undefined') {
+      console.error('CategoryForm component not found in window object');
+      console.log('Available window components:', Object.keys(window).filter(k => k.includes('Component') || k.includes('Form') || k.includes('Category')));
+      return;
+    }
+
+    const container = document.getElementById('category-form-root');
+    if (!container) {
+      console.error('Container #category-form-root not found');
+      return;
+    }
+
+    try {
+      console.log('Creating CategoryForm component for edit with categoryId:', categoryId);
+
+      const root = window.createRoot(container);
+      const element = window.React.createElement(window.CategoryForm, {
+        categoryId: categoryId,
+        mode: 'edit'
+      });
+
+      root.render(element);
+      console.log('CategoryForm component rendered successfully');
+
+    } catch (error) {
+      console.error('Error rendering CategoryForm component:', error);
+      container.innerHTML = '<div class="alert alert-danger">Error loading component: ' + error.message + '</div>';
+    }
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCategoryForm);
+  } else {
+    initializeCategoryForm();
+  }
+})();
+</script>

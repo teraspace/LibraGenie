@@ -1,0 +1,117 @@
+<div id="category-form-new"></div>
+
+<script>
+  // Function to initialize the CategoryForm component
+  function initializeCategoryForm() {
+    // Only run if we're on the category form page
+    const container = document.getElementById('category-form-new');
+    if (!container) {
+      // Silently return if container doesn't exist (we're not on the category form page)
+      return;
+    }
+
+    console.log('🚀 CategoryForm React loading...');
+
+    // Debug: Check what's available in window
+    console.log('Available React components:', {
+      React: !!window.React,
+      ReactDOM: !!window.ReactDOM,
+      createRoot: !!window.createRoot,
+      CategoryForm: !!window.CategoryForm,
+      renderReactComponent: !!window.renderReactComponent
+    });
+
+    // Check if React and components are available
+    if (!window.React) {
+      console.error('❌ React not loaded');
+      return;
+    }
+
+    if (!window.CategoryForm) {
+      console.error('❌ CategoryForm component not loaded');
+      console.log('Available window properties:', Object.keys(window).filter(key => key.includes('Category')));
+      return;
+    }
+
+    if (!window.renderReactComponent) {
+      console.error('❌ renderReactComponent helper not loaded');
+      return;
+    }
+
+    console.log('✅ All dependencies loaded, fetching form data...');
+
+    // Fetch data for the form
+    fetch('/categories/new.json', {
+      method: 'GET',
+      credentials: 'same-origin',  // Include cookies for authentication
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      }
+    })
+      .then(response => {
+        console.log('📡 Response status:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('📋 Form data loaded:', data);
+
+        // Create React component
+        const element = React.createElement(CategoryForm, {
+          category: data.category,
+          isEdit: false
+        });
+
+        console.log('⚛️ React element created:', element);
+
+        // Render using our helper function
+        const container = document.getElementById('category-form-new');
+        console.log('📦 Container found:', !!container);
+
+        if (!container) {
+          console.error('❌ Container not found for CategoryForm');
+          return;
+        }
+
+        // Wait for ReactRootManager to be available
+        if (window.ReactRootManager) {
+          window.renderReactComponent(element, container, 'CategoryForm');
+          console.log('✅ CategoryForm component rendered successfully');
+        } else {
+          console.log('⏳ ReactRootManager not yet available, using fallback');
+          if (window.renderReactComponent) {
+            window.renderReactComponent(element, container, 'CategoryForm');
+            console.log('✅ CategoryForm component rendered successfully (fallback)');
+          } else {
+            console.error('❌ Neither ReactRootManager nor renderReactComponent available');
+          }
+        }
+      })
+      .catch(error => {
+        console.error('💥 Error loading form data:', error);
+
+        // Show error message to user - but only if we're on the right page
+        const container = document.getElementById('category-form-new');
+        if (container) {
+          container.innerHTML = `
+            <div class="bg-red-50 border border-red-200 rounded-md p-4">
+              <h3 class="text-red-800 font-medium">Error loading form</h3>
+              <p class="mt-2 text-red-700 text-sm">${error.message}</p>
+              <p class="mt-2 text-red-700 text-sm">Please try refreshing the page or go back to <a href="/categories" class="underline">Categories List</a></p>
+            </div>
+          `;
+        }
+      });
+  }
+
+  // Initialize on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', initializeCategoryForm);
+
+  // Initialize on Turbo events for better compatibility
+  document.addEventListener('turbo:load', initializeCategoryForm);
+  document.addEventListener('turbo:render', initializeCategoryForm);
+</script>

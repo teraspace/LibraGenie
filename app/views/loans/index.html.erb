@@ -1,0 +1,124 @@
+<div class="max-w-7xl mx-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">My Loans</h1>
+    <%= link_to "Borrow a Book", new_loan_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium" %>
+  </div>
+
+  <!-- Filter buttons -->
+  <div class="mb-6">
+    <div class="flex space-x-2">
+      <%= link_to "All", loans_path,
+          class: "px-3 py-2 text-sm font-medium rounded-md #{params[:filter].blank? ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}" %>
+      <%= link_to "Active", loans_path(filter: 'active'),
+          class: "px-3 py-2 text-sm font-medium rounded-md #{params[:filter] == 'active' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}" %>
+      <%= link_to "Returned", loans_path(filter: 'returned'),
+          class: "px-3 py-2 text-sm font-medium rounded-md #{params[:filter] == 'returned' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-gray-700'}" %>
+      <%= link_to "Overdue", loans_path(filter: 'overdue'),
+          class: "px-3 py-2 text-sm font-medium rounded-md #{params[:filter] == 'overdue' ? 'bg-red-100 text-red-700' : 'text-gray-500 hover:text-gray-700'}" %>
+    </div>
+  </div>
+
+  <% if @loans.any? %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        <% @loans.each do |loan| %>
+          <li>
+            <div class="px-4 py-4 sm:px-6">
+              <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center">
+                    <div class="flex-1">
+                      <p class="text-lg font-medium text-gray-900 truncate">
+                        <%= loan.book.title %>
+                      </p>
+                      <p class="text-sm text-gray-500">
+                        by <%= loan.book.author.name %> • <%= loan.book.category.name %>
+                      </p>
+                      <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <span class="mr-4">
+                          <strong>Borrowed:</strong> <%= loan.created_at.strftime("%B %d, %Y") %>
+                        </span>
+                        <span class="mr-4">
+                          <strong>Due:</strong> <%= loan.due_date.strftime("%B %d, %Y") %>
+                        </span>
+                        <% if loan.returned_at %>
+                          <span class="text-green-600">
+                            <strong>Returned:</strong> <%= loan.returned_at.strftime("%B %d, %Y") %>
+                          </span>
+                        <% elsif loan.overdue? %>
+                          <span class="text-red-600 font-medium">
+                            <%= pluralize((Date.current - loan.due_date).to_i, 'day') %> overdue
+                          </span>
+                        <% else %>
+                          <span class="text-blue-600">
+                            <%= pluralize((loan.due_date - Date.current).to_i, 'day') %> remaining
+                          </span>
+                        <% end %>
+                      </div>
+                    </div>
+
+                    <!-- Status badge -->
+                    <div class="ml-4">
+                      <% if loan.returned_at %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Returned
+                        </span>
+                      <% elsif loan.overdue? %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Overdue
+                        </span>
+                      <% else %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Active
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="ml-4 flex-shrink-0 flex space-x-2">
+                  <%= link_to "View", loan, class: "text-blue-600 hover:text-blue-900 text-sm font-medium" %>
+                  <% unless loan.returned_at %>
+                    <%= link_to "Return", return_book_loan_path(loan),
+                        method: :patch,
+                        confirm: "Are you sure you want to return this book?",
+                        class: "text-green-600 hover:text-green-900 text-sm font-medium" %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <!-- Pagination if using Kaminari -->
+    <% if defined?(Kaminari) && respond_to?(:paginate) %>
+      <div class="mt-6">
+        <%= paginate @loans %>
+      </div>
+    <% end %>
+
+  <% else %>
+    <div class="text-center py-12">
+      <div class="max-w-md mx-auto">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <h3 class="mt-2 text-lg font-medium text-gray-900">No loans found</h3>
+        <p class="mt-1 text-gray-500">
+          <% if params[:filter].present? %>
+            No loans match the current filter.
+          <% else %>
+            You haven't borrowed any books yet.
+          <% end %>
+        </p>
+        <div class="mt-6">
+          <%= link_to "Borrow your first book", new_loan_path,
+              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

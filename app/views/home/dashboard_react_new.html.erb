@@ -1,0 +1,80 @@
+<div id="dashboard-react"></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for scripts to load
+    setTimeout(function() {
+      console.log('Dashboard React loading...');
+      console.log('Available globals:', {
+        React: typeof window.React,
+        ReactDOM: typeof window.ReactDOM,
+        Dashboard: typeof window.Dashboard
+      });
+
+      // Check if we have React in any form
+      if (window.React) {
+        console.log('React methods:', Object.keys(window.React));
+      }
+      if (window.ReactDOM) {
+        console.log('ReactDOM methods:', Object.keys(window.ReactDOM));
+      }
+
+      // Check if user is signed in (you can pass this from Rails)
+      const userSignedIn = <%= user_signed_in? %>;
+      const userName = '<%= user_signed_in? ? (current_user.name || current_user.email) : "" %>';
+
+      // Function to render component with React 19 API
+      function renderDashboard(data) {
+        if (!window.React || !window.ReactDOM || !window.Dashboard) {
+          console.error('Required React components not loaded:', {
+            React: !!window.React,
+            ReactDOM: !!window.ReactDOM,
+            Dashboard: !!window.Dashboard
+          });
+          document.getElementById('dashboard-react').innerHTML =
+            '<div class="p-4 bg-yellow-100 border border-yellow-400 rounded">React Dashboard component failed to load. Please refresh the page.</div>';
+          return;
+        }
+
+        const element = window.React.createElement(window.Dashboard, {
+          user: userSignedIn ? { name: userName } : null,
+          initialData: data
+        });
+
+        const container = document.getElementById('dashboard-react');
+
+        try {
+          // Use React 19 createRoot API directly
+          console.log('Creating React root...');
+          const root = window.ReactDOM.createRoot(container);
+          root.render(element);
+          console.log('Dashboard rendered successfully!');
+        } catch (error) {
+          console.error('Error rendering Dashboard:', error);
+          container.innerHTML = '<div class="p-4 bg-red-100 border border-red-400 rounded">Error rendering React component: ' + error.message + '</div>';
+        }
+      }
+
+      // Fetch dashboard data
+      fetch('/dashboard_data.json')
+        .then(response => {
+          console.log('Response status:', response.status);
+          return response.json();
+        })
+        .then(data => {
+          console.log('Dashboard data loaded:', data);
+          renderDashboard(data);
+        })
+        .catch(error => {
+          console.error('Error loading dashboard data:', error);
+          // Render basic component even if data fails
+          const fallbackData = {
+            stats: { totalBooks: 0, availableBooks: 0, borrowedBooks: 0, totalLoans: 0 },
+            recent_books: [],
+            user_loans: []
+          };
+          renderDashboard(fallbackData);
+        });
+    }, 200); // 200ms delay to ensure scripts load
+  });
+</script>

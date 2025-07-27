@@ -1,0 +1,95 @@
+<div class="space-y-6">
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-900">Books</h1>
+    <div class="flex space-x-3">
+      <%= link_to "Add New Book (ERB)", new_book_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg" %>
+      <%= link_to "Add New Book (React)", new_react_books_path, class: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg" %>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <%= form_tag books_path, method: :get, local: true, class: "space-y-4" do %>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <%= text_field_tag :search, params[:search], placeholder: "Search books...",
+              class: "w-full border rounded-md px-3 py-2" %>
+        </div>
+        <div>
+          <%= select_tag :category_id,
+              options_from_collection_for_select(@categories, :id, :name, params[:category_id]),
+              { prompt: "All Categories", class: "w-full border rounded-md px-3 py-2" } %>
+        </div>
+        <div>
+          <%= select_tag :author_id,
+              options_from_collection_for_select(@authors, :id, :name, params[:author_id]),
+              { prompt: "All Authors", class: "w-full border rounded-md px-3 py-2" } %>
+        </div>
+        <div>
+          <%= select_tag :available,
+              options_for_select([["All Books", ""], ["Available", "true"], ["Borrowed", "false"]], params[:available]),
+              { class: "w-full border rounded-md px-3 py-2" } %>
+        </div>
+      </div>
+      <div class="flex space-x-2">
+        <%= submit_tag "Search", class: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" %>
+        <%= link_to "Clear", books_path, class: "bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Books Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% @books.each do |book| %>
+      <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <h3 class="text-xl font-semibold mb-2">
+          <%= link_to book.title, book, class: "text-blue-600 hover:text-blue-800" %>
+        </h3>
+
+        <div class="space-y-2 text-sm text-gray-600 mb-4">
+          <p><strong>Author:</strong> <%= link_to book.author.name, book.author, class: "text-blue-600 hover:text-blue-800" %></p>
+          <p><strong>Category:</strong> <%= link_to book.category.name, book.category, class: "text-blue-600 hover:text-blue-800" %></p>
+          <p><strong>ISBN:</strong> <%= book.isbn %></p>
+          <% if book.publication_date %>
+            <p><strong>Published:</strong> <%= book.publication_date.strftime("%Y") %></p>
+          <% end %>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <span class="px-2 py-1 rounded text-xs font-medium <%= book.available? ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+            <%= book.available? ? 'Available' : 'Borrowed' %>
+          </span>
+
+          <div class="flex space-x-2">
+            <%= link_to "View", book, class: "text-blue-600 hover:text-blue-800 text-sm" %>
+            <%= link_to "Edit", edit_book_path(book), class: "text-gray-600 hover:text-gray-800 text-sm" %>
+            <%= button_to "Delete", book, method: :delete,
+                data: { confirm: "Are you sure?" },
+                class: "text-red-600 hover:text-red-800 text-sm border-0 bg-transparent p-0" %>
+          </div>
+        </div>
+
+        <% if book.available? && current_user.can_borrow_book? %>
+          <div class="mt-4">
+            <%= button_to "Borrow This Book", borrow_book_path(book),
+                class: "w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-center border-0",
+                data: { confirm: "Are you sure you want to borrow this book?" } %>
+          </div>
+        <% elsif !book.available? && book.current_loan&.user == current_user %>
+          <div class="mt-4">
+            <%= button_to "Return This Book", return_book_book_path(book), method: :patch,
+                class: "w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded text-center border-0",
+                data: { confirm: "Are you sure you want to return this book?" } %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @books.empty? %>
+    <div class="text-center py-12">
+      <p class="text-gray-500 text-lg">No books found.</p>
+      <%= link_to "Add the first book", new_book_path, class: "text-blue-600 hover:text-blue-800" %>
+    </div>
+  <% end %>
+</div>
