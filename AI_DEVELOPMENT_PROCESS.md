@@ -108,7 +108,7 @@ class Book < ApplicationRecord
   validates :total_copies, presence: true, numericality: { greater_than: 0 }
 
   scope :available, -> { where(available: true) }
-  
+
   def can_be_borrowed?
     available? && total_copies > 0
   end
@@ -128,7 +128,7 @@ class BooksController < ApplicationController
 
   def create
     @book = Book.new(book_params)
-    
+
     if @book.save
       redirect_to @book, notice: 'Book created successfully.'
     else
@@ -226,7 +226,7 @@ Book.all.each { |book| book.author.name }  # Triggers N+1
 ```bash
 # TOOLS USED FOR VALIDATION:
 bundle exec rubocop          # Style and convention checks
-bundle exec brakeman         # Security vulnerability scan  
+bundle exec brakeman         # Security vulnerability scan
 bundle exec rspec            # Test coverage verification
 rails_best_practices         # Rails-specific analysis
 
@@ -254,11 +254,11 @@ end
 class BooksController < ApplicationController
   before_action :authenticate_user!
   before_action :authorize_librarian, only: [:new, :create, :edit, :update, :destroy]
-  
+
   def create
     @book = Book.new(book_params)
     authorize @book  # Pundit authorization
-    
+
     respond_to do |format|
       if @book.save
         format.html { redirect_to @book, notice: 'Book created successfully.' }
@@ -309,7 +309,7 @@ def index
   @books = Book.includes(:author, :category, :loans)
                 .page(params[:page])
                 .per(20)
-  
+
   @books = @books.search(params[:search]) if params[:search].present?
 end
 
@@ -324,12 +324,12 @@ end
 # Dashboard API with intelligent caching
 def dashboard_data
   @data = Rails.cache.fetch(
-    "dashboard_stats_#{current_user.role}_#{current_user.id}", 
+    "dashboard_stats_#{current_user.role}_#{current_user.id}",
     expires_in: 5.minutes
   ) do
     compute_dashboard_stats
   end
-  
+
   render json: @data
 end
 
@@ -341,7 +341,7 @@ def compute_dashboard_stats
     availableBooks: Book.available.count,
     borrowedBooks: Book.borrowed.count
   }
-  
+
   # Role-specific stats to reduce unnecessary queries
   if current_user.librarian?
     base_stats.merge!(librarian_stats)
@@ -392,7 +392,7 @@ class ReactRootManager {
     try {
       // Handle React 19 createRoot properly
       let root = this.roots.get(containerId);
-      
+
       if (!root) {
         root = this.createRoot(container);
         this.roots.set(containerId, root);
@@ -400,7 +400,7 @@ class ReactRootManager {
 
       const element = React.createElement(component, props);
       root.render(element);
-      
+
       this.initializationFlags.add(initKey);
       return root;
     } catch (error) {
@@ -480,15 +480,15 @@ end
 def borrow_book
   Book.transaction do
     book = Book.lock.find(params[:id])
-    
+
     if book.available_copies <= 0
       raise ActiveRecord::Rollback, "No copies available"
     end
-    
+
     if current_user.loans.active.count >= current_user.loan_limit
       raise ActiveRecord::Rollback, "Loan limit exceeded"
     end
-    
+
     # Atomic operation to prevent race conditions
     book.decrement!(:available_copies)
     current_user.loans.create!(book: book, due_date: 2.weeks.from_now)
@@ -508,22 +508,22 @@ def can_borrow_book?(user, book)
   return false, "User at loan limit" if user.at_loan_limit?
   return false, "Book restricted to advanced members" if book.restricted? && !user.advanced_member?
   return false, "Book on hold for other user" if book.on_hold_for_other_user?(user)
-  
+
   [true, "Can borrow"]
 end
 
 # Overdue calculation with business rules
 def calculate_fine(loan)
   return 0 unless loan.overdue?
-  
+
   days_overdue = (Date.current - loan.due_date).to_i
   base_fine = days_overdue * 0.50  # $0.50 per day
-  
+
   # Progressive fine structure
   if days_overdue > 30
     base_fine += (days_overdue - 30) * 1.00  # Additional $1.00 after 30 days
   end
-  
+
   # Cap fine at book replacement cost
   [base_fine, loan.book.replacement_cost].min
 end
@@ -560,7 +560,7 @@ BEFORE:
 
 AFTER:
 ├── Rubocop Offenses: 0
-├── Brakeman Warnings: 0  
+├── Brakeman Warnings: 0
 ├── Test Coverage: 96%
 ├── Cyclomatic Complexity: 4.2 avg
 ```
